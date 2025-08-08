@@ -1,43 +1,19 @@
+import "dotenv/config";
 import express from "express";
 import conectaNaDabase from "./config/dbConnect.js";
 import livro from "./models/livro.js";
+import routes from "./routes/index.js"
 
 const conexao = await conectaNaDabase();
 conexao.on("error", (err) => {
-    console.error("Erro de conexão", err)
-})
+	console.error("Erro de conexão", err);
+});
 conexao.once("open", () => {
-    console.log("Conexão com o banco realizada com sucesso!")
-})
+	console.log("Conexão com o banco realizada com sucesso!");
+});
 
 const app = express();
-app.use(express.json());
-
-
-app.get("/", (req, res) => {
-	res.status(200).send("Curso de Node.js");
-});
-
-app.get("/livros", async (req, res) => {
-	const listaLivros = await livro.find({});
-	console.log('O QUE LISTA LIVROS RETORNA? ', listaLivros)
-	res.status(200).json(listaLivros);
-});
-app.get("/livros/:id", (req, res) => {
-	const index = buscaLivro(req.params.id);
-	res.status(200).json(livros[index]);
-});
-
-app.post("/livros", (req, res) => {
-	livros.push(req.body);
-	res.status(201).send("Livro cadastrado com sucesso!");
-});
-
-app.put("/livros/:id", (req, res) => {
-	const index = buscaLivro(req.params.id);
-	livros[index].titulo = req.body.titulo;
-	res.status(200).json(livros);
-});
+routes(app);
 
 app.delete("/livros/:id", (req, res) => {
 	const index = buscaLivro(req.params.id);
@@ -46,4 +22,3 @@ app.delete("/livros/:id", (req, res) => {
 });
 
 export default app;
-
