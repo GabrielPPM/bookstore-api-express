@@ -20,6 +20,7 @@ app.get("/", (req, res) => {
 
 app.get("/livros", async (req, res) => {
 	const listaLivros = await livro.find({});
+	console.log('O QUE LISTA LIVROS RETORNA? ', listaLivros)
 	res.status(200).json(listaLivros);
 });
 app.get("/livros/:id", (req, res) => {
