@@ -1,4 +1,5 @@
 import livro from "../models/livro.js";
+import {autor} from "../models/Autor.js";
 
 class LivroController {
 	static async listarLivros(req, res) {
@@ -6,7 +7,7 @@ class LivroController {
 			const listaLivros = await livro.find({});
 			res.status(200).json(listaLivros);
 		} catch (err) {
-			res.status(500).json({ error: err.message });
+			res.status(500).json({error: err.message});
 		}
 	}
 
@@ -16,13 +17,28 @@ class LivroController {
 			const livroEncontrado = await livro.findById(id);
 			res.status(200).json(livroEncontrado);
 		} catch (err) {
-			res.status(500).json({ error: err.message });
+			res.status(500).json({error: err.message});
+		}
+	}
+
+	static async listarLivroPorEditora(req, res) {
+		try {
+			const editora = req.query.editora;
+			const livrosEncontrados = await livro.find({editora: editora});
+			res.status(200).json({content: livrosEncontrados})
+		} catch (err) {
+			res.status(500).json(`${err} - Erro ao procurar pelo livro`)
 		}
 	}
 
 	static async cadastrarLivro(req, res) {
 		try {
-			const novoLivro = await livro.create(req.body);
+			const dadosDoLivro = await req.body;
+			const dadosDoAutor = await autor.findById(dadosDoLivro.autor);
+			const novoLivro = await livro.create({
+				...dadosDoLivro,
+				autor: {...dadosDoAutor._doc},
+			});
 			res.status(201).json({
 				message: "Livro adicionado com sucesso",
 				livro: novoLivro,
