@@ -18,7 +18,7 @@ const app = express();
 routes(app);
 
 app.use((error, req, res, next) => {
-	controladorDeErros(error)
+	controladorDeErros(error, req, res, next)
 });
 
 export default app;

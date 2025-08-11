@@ -1,12 +1,22 @@
 import mongoose from "mongoose";
+import ErroBase from "../erros/erroBase.js";
+import ErroDeRequisicao from "../erros/erroDeRequisicao.js";
+import ErroDeValidacao from "../erros/erroDeValidacao.js";
 
 function controladorDeErros(error, req, res, next) {
+	console.error("ERRO: ", error);
+
 	if (error instanceof mongoose.Error.CastError) {
-		res.status(400).json({
-			error: `Um ou mais dados fornecidos estão incorretos`,
-		});
+		new ErroDeRequisicao().enviarResposta(res);
+	} else if (error instanceof mongoose.Error.ValidationError) {
+		const mensagensDeErro = Object.values(error.errors)
+		.map((erro) => erro.message)
+		.join();
+
+		//Um ou mais campos não passaram pela validação
+		new ErroDeValidacao().enviarResposta(res);
 	} else {
-		res.status(500).json({ err: "Erro interno do servidor" });
+		new ErroBase().enviarResposta(res);
 	}
 }
 
