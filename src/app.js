@@ -2,7 +2,9 @@ import "dotenv/config";
 import express from "express";
 import conectaNaDabase from "./config/dbConnect.js";
 import livro from "./models/livro.js";
-import routes from "./routes/index.js"
+import routes from "./routes/index.js";
+import mongoose from "mongoose";
+import controladorDeErros from "./middleware/controladorDeErros.js";
 
 const conexao = await conectaNaDabase();
 conexao.on("error", (err) => {
@@ -15,10 +17,8 @@ conexao.once("open", () => {
 const app = express();
 routes(app);
 
-app.delete("/livros/:id", (req, res) => {
-	const index = buscaLivro(req.params.id);
-	livros.splice(index, 1);
-	res.status(200).json(livros);
+app.use((error, req, res, next) => {
+	controladorDeErros(error)
 });
 
 export default app;
