@@ -1,5 +1,5 @@
 import livro from "../models/livro.js";
-import { autor } from "../models/Autor.js";
+import { autor } from "../models/autor.js";
 import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 import mongoose from "mongoose";
 

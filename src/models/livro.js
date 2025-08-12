@@ -1,13 +1,30 @@
 import mongoose from "mongoose";
-import { AutorSchema } from "./Autor.js"
+import { AutorSchema } from "./autor.js";
 
 const livroSchema = new mongoose.Schema(
 	{
 		id: { type: mongoose.Schema.Types.ObjectId },
-		titulo: { type: String, required: [true, "O título do livro é obrigatório"] },
-		editora: { type: String },
+		titulo: {
+			type: String,
+			required: [true, "O título do livro é obrigatório"],
+		},
+		editora: {
+			type: String,
+			enum: {
+				values: ["Casa do código", "Alura", "LeYa"],
+				message: `A editora {VALUE} não faz parte das editoras cadastradas`,
+			},
+		},
 		preco: { type: Number },
-		paginas: { type: Number },
+		paginas: {
+			type: Number,
+			validate: {
+				validator: (valor) => {
+					return valor >= 10 && valor <= 5000;
+				},
+				message: "O número de páginas deve estar entre 10 e 5000",
+			},
+		},
 		autor: AutorSchema,
 	},
 	{ versionKey: false }
