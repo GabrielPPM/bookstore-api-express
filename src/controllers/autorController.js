@@ -1,6 +1,7 @@
 import express from "express";
 import { autor } from "../models/Autor.js";
 import mongoose from "mongoose";
+import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 
 class AutorController {
 	static async listarAutores(req, res, next) {
@@ -30,16 +31,14 @@ class AutorController {
 			if (dadosDoAutor != null) {
 				res.status(200).json({ content: dadosDoAutor });
 			} else {
-				res.status(404).json({
-					err: "ID de autor específicado não foi encontrado",
-				});
+				next(
+					new ErroRotaNaoEncontrada(
+						"O ID do autor não foi encontrado"
+					)
+				);
 			}
 		} catch (err) {
-			if (err instanceof mongoose.Error.CastError) {
-				next(err);
-			} else {
-				next(err);
-			}
+			next(err);
 		}
 	}
 
@@ -47,12 +46,21 @@ class AutorController {
 		try {
 			const id = req.params.id;
 			const dadosDoAutor = await autor.findByIdAndUpdate(id, req.body);
+
 			res.status(200).json({
 				message: `Dados do autor atualizados com sucesso`,
 				content: dadosDoAutor,
 			});
 		} catch (err) {
-			next(err);
+			if (err instanceof mongoose.Error.CastError) {
+				next(
+					new ErroRotaNaoEncontrada(
+						"O ID do autor não foi encontrado"
+					)
+				);
+			} else {
+				next(err);
+			}
 		}
 	}
 

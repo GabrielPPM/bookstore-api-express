@@ -1,9 +1,12 @@
-import ErroBase from "./erroBase.js";
+import ErroDeRequisicao from "./erroDeRequisicao.js";
 
-class ErroDeValidacao extends ErroBase{
-    constructor(){
-        super("Um ou mais campos não cumprem os requisitos de validação", 400);
-    }
+class ErroDeValidacao extends ErroDeRequisicao {
+	constructor(error) {
+		const mensagensDeErro = Object.values(error.errors)
+			.map((erro) => erro.message)
+			.join();
+		super(mensagensDeErro);
+	}
 }
 
 export default ErroDeValidacao;

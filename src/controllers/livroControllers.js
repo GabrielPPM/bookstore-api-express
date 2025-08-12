@@ -1,5 +1,7 @@
 import livro from "../models/livro.js";
 import { autor } from "../models/Autor.js";
+import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
+import mongoose from "mongoose";
 
 class LivroController {
 	static async listarLivros(req, res, next) {
@@ -7,7 +9,7 @@ class LivroController {
 			const listaLivros = await livro.find({});
 			res.status(200).json(listaLivros);
 		} catch (err) {
-			next(err)
+			next(err);
 		}
 	}
 
@@ -15,11 +17,14 @@ class LivroController {
 		try {
 			const id = req.params.id;
 			const livroEncontrado = await livro.findById(id);
-			if(livroEncontrado != null){
+			if (livroEncontrado != null) {
 				res.status(200).json(livroEncontrado);
-			}
-			else{
-				res.status(404).json({error: "livro não encontrado"})
+			} else {
+				next(
+					new ErroRotaNaoEncontrada(
+						"O ID do livro não foi encontrado"
+					)
+				);
 			}
 		} catch (err) {
 			next(err);
@@ -61,7 +66,15 @@ class LivroController {
 				message: "O livro foi atualizado com sucesso",
 			});
 		} catch (err) {
-			next(err);
+			if (err instanceof mongoose.Error.CastError) {
+				next(
+					new ErroRotaNaoEncontrada(
+						"O ID do livro não foi encontrado"
+					)
+				);
+			} else {
+				next(err);
+			}
 		}
 	}
 
