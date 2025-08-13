@@ -1,5 +1,4 @@
-import express from "express";
-import { autor } from "../models/autor.js";
+import { autor } from "../models/index.js";
 import mongoose from "mongoose";
 import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 
