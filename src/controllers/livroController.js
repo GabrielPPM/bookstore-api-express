@@ -1,15 +1,25 @@
 import { livro } from "../models/index.js";
 import { autor } from "../models/index.js";
-import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 import mongoose from "mongoose";
+import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
+import ErroDeRequisicao from "../erros/erroDeRequisicao.js";
 
 mongoose.set("debug", true);
 
 class LivroController {
 	static async listarLivros(req, res, next) {
 		try {
-			const listaLivros = await livro.find({});
-			res.status(200).json(listaLivros);
+			const { limite = 5, pagina = 1 } = req.query;
+			if (limite > 0 && pagina > 0) {
+				const listaLivros = await livro
+					.find({})
+					.skip((pagina - 1) * 5)
+					.limit(limite)
+					.exec();
+				res.status(200).json(listaLivros);
+			} else {
+				next(new ErroDeRequisicao());
+			}
 		} catch (err) {
 			next(err);
 		}

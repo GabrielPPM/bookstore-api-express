@@ -9,7 +9,7 @@ function controladorDeErros(error, req, res, next) {
 		new ErroDeRequisicao().enviarResposta(res);
 	} else if (error instanceof mongoose.Error.ValidationError) {
 		new ErroDeValidacao(error).enviarResposta(res);
-	} else if (error instanceof ErroRotaNaoEncontrada){
+	} else if (error instanceof ErroBase){
 		error.enviarResposta(res)
 	} else {
 		new ErroBase().enviarResposta(res);
