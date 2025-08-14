@@ -3,6 +3,8 @@ import { autor } from "../models/index.js";
 import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 import mongoose from "mongoose";
 
+mongoose.set("debug", true);
+
 class LivroController {
 	static async listarLivros(req, res, next) {
 		try {
@@ -36,16 +38,11 @@ class LivroController {
 			const { editora, titulo, nomeDoAutor, minPaginas, maxPaginas } =
 				req.query;
 
-			console.log("NOME DO AUTOR: ", nomeDoAutor);
 			const busca = {};
+			let livrosEncontrados;
 
 			if (editora) busca.editora = { $regex: editora, $options: "i" };
 			if (titulo) busca.titulo = { $regex: titulo, $options: "i" };
-			if (nomeDoAutor) {
-				const dadosDoAutor = await autor.find({nome: {$regex: nomeDoAutor, $options: "i"}})
-				busca.autor = dadosDoAutor;
-				console.log('SOCOROO! ', busca)
-			}
 			if (minPaginas && maxPaginas) {
 				busca.paginas = {
 					$gte: minPaginas,
@@ -54,9 +51,20 @@ class LivroController {
 			} else if (minPaginas) busca.paginas = { $gte: minPaginas };
 			else if (maxPaginas) busca.paginas = { $lte: maxPaginas };
 
-			console.log("BUSCA: ", busca);
+			if (nomeDoAutor) {
+				const dadosDoAutor = await autor.find({
+					nome: { $regex: nomeDoAutor, $options: "i" },
+				});
+				if (dadosDoAutor != null) {
+					busca.autor = dadosDoAutor;
+					livrosEncontrados = await livro.find(busca);
+				} else {
+					res.status(200).send([]);
+				}
+			} else {
+				livrosEncontrados = await livro.find(busca);
+			}
 
-			const livrosEncontrados = await livro.find(busca);
 			res.status(200).json({ content: livrosEncontrados });
 		} catch (err) {
 			next(err);
