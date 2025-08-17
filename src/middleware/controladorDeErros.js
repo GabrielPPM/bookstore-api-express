@@ -12,6 +12,7 @@ function controladorDeErros(error, req, res, next) {
 	} else if (error instanceof ErroBase){
 		error.enviarResposta(res)
 	} else {
+		console.error(error)
 		new ErroBase().enviarResposta(res);
 	}
 }

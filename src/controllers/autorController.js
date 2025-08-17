@@ -1,12 +1,14 @@
-import { autor } from "../models/index.js";
+import {autor} from "../models/index.js";
 import mongoose from "mongoose";
 import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
+import paginar from "../middleware/paginar.js";
 
 class AutorController {
 	static async listarAutores(req, res, next) {
 		try {
-			const autores = await autor.find({});
-			res.status(200).json({ content: autores });
+			const autores = autor.find({});
+			req.resultado = autores;
+			next();
 		} catch (err) {
 			next(err);
 		}
@@ -28,7 +30,7 @@ class AutorController {
 			const id = req.params.id;
 			const dadosDoAutor = await autor.findById(id);
 			if (dadosDoAutor != null) {
-				res.status(200).json({ content: dadosDoAutor });
+				res.status(200).json({content: dadosDoAutor});
 			} else {
 				next(
 					new ErroRotaNaoEncontrada(

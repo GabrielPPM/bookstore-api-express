@@ -6,7 +6,6 @@ class ErroBase extends Error {
 	}
     
 	enviarResposta(res) {
-        console.log('RES!', this.message)
 		res.status(this.status).json({
 			error: this.message,
 			status: this.status,

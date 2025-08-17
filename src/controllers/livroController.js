@@ -1,5 +1,5 @@
-import { livro } from "../models/index.js";
-import { autor } from "../models/index.js";
+import {livro} from "../models/index.js";
+import {autor} from "../models/index.js";
 import mongoose from "mongoose";
 import ErroRotaNaoEncontrada from "../erros/erroRotaNaoEncontrada.js";
 import ErroDeRequisicao from "../erros/erroDeRequisicao.js";
@@ -9,17 +9,9 @@ mongoose.set("debug", true);
 class LivroController {
 	static async listarLivros(req, res, next) {
 		try {
-			const { limite = 5, pagina = 1 } = req.query;
-			if (limite > 0 && pagina > 0) {
-				const listaLivros = await livro
-					.find({})
-					.skip((pagina - 1) * 5)
-					.limit(limite)
-					.exec();
-				res.status(200).json(listaLivros);
-			} else {
-				next(new ErroDeRequisicao());
-			}
+			const buscaLivros = livro.find();
+			req.resultado = buscaLivros;
+			next();
 		} catch (err) {
 			next(err);
 		}
@@ -45,37 +37,40 @@ class LivroController {
 
 	static async listarLivroPorFiltro(req, res, next) {
 		try {
-			const { editora, titulo, nomeDoAutor, minPaginas, maxPaginas } =
+			const {editora, titulo, nomeDoAutor, minPaginas, maxPaginas} =
 				req.query;
 
 			const busca = {};
 			let livrosEncontrados;
 
-			if (editora) busca.editora = { $regex: editora, $options: "i" };
-			if (titulo) busca.titulo = { $regex: titulo, $options: "i" };
+			if (editora) busca.editora = {$regex: editora, $options: "i"};
+			if (titulo) busca.titulo = {$regex: titulo, $options: "i"};
 			if (minPaginas && maxPaginas) {
 				busca.paginas = {
 					$gte: minPaginas,
 					$lte: maxPaginas,
 				};
-			} else if (minPaginas) busca.paginas = { $gte: minPaginas };
-			else if (maxPaginas) busca.paginas = { $lte: maxPaginas };
+			} else if (minPaginas) busca.paginas = {$gte: minPaginas};
+			else if (maxPaginas) busca.paginas = {$lte: maxPaginas};
 
 			if (nomeDoAutor) {
 				const dadosDoAutor = await autor.find({
-					nome: { $regex: nomeDoAutor, $options: "i" },
+					nome: {$regex: nomeDoAutor, $options: "i"},
 				});
 				if (dadosDoAutor != null) {
 					busca.autor = dadosDoAutor;
-					livrosEncontrados = await livro.find(busca);
+					livrosEncontrados = livro.find(busca);
+
+					req.resultado = livrosEncontrados;
+					next();
 				} else {
 					res.status(200).send([]);
 				}
 			} else {
-				livrosEncontrados = await livro.find(busca);
+				livrosEncontrados = livro.find(busca);
+				req.resultado = livrosEncontrados;
+				next();
 			}
-
-			res.status(200).json({ content: livrosEncontrados });
 		} catch (err) {
 			next(err);
 		}
@@ -87,7 +82,7 @@ class LivroController {
 			const dadosDoAutor = await autor.findById(dadosDoLivro.autor);
 			const novoLivro = await livro.create({
 				...dadosDoLivro,
-				autor: { ...dadosDoAutor._doc },
+				autor: {...dadosDoAutor._doc},
 			});
 			res.status(201).json({
 				message: "Livro adicionado com sucesso",
